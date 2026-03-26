@@ -1,0 +1,51 @@
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        ArrayList<Integer> numbers = new ArrayList<Integer>();
+        Random rand = new Random(42);
+
+        // Add 15 random numbers (0–99 for example)
+        for (int i = 0; i < 15; i++) {
+            numbers.add(rand.nextInt(100));
+        }
+
+        // Sort the list
+        Collections.sort(numbers);
+
+        // Print the sorted list
+        int mid = (numbers.size())/2;
+        System.out.println(numbers);
+        System.out.println("Mid = " + mid + ", " + numbers.get(mid));
+        List<Integer> sub1 = numbers.subList(0, mid);
+        List<Integer> sub2 = numbers.subList(mid, numbers.size());
+        System.out.println("Sublists" + sub1 + ", " + sub2);
+        
+        System.out.println(f(76,numbers));
+    }
+
+    public static Integer f(Integer n, ArrayList<Integer> arr){
+        int mid = (arr.size())/2;  //Rounded to the smaller integer
+        int searchIndex;
+        System.out.println("New Mid: " + mid);
+        if (arr.get(mid)== n){
+            return mid; 
+        }
+        else {
+            if (arr.get(mid) > n) {
+                arr = new ArrayList<>(arr.subList(0, mid));
+                searchIndex = 
+                System.out.println("New Array: " + arr);
+            }
+            else {
+                arr = new ArrayList<>(arr.subList(mid, arr.size()));
+                System.out.println("New Array: " + arr);
+            }
+        }
+        return f(n,arr);
+    }
+    
+}
