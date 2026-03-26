@@ -4,6 +4,8 @@ import java.util.Random;
 import java.util.List;
 
 public class Main {
+    static int searchIndex;
+    static int counter = 0;
     public static void main(String[] args) {
         ArrayList<Integer> numbers = new ArrayList<Integer>();
         Random rand = new Random(42);
@@ -15,37 +17,66 @@ public class Main {
 
         // Sort the list
         Collections.sort(numbers);
-
         // Print the sorted list
         int mid = (numbers.size())/2;
+        searchIndex = mid;
         System.out.println(numbers);
         System.out.println("Mid = " + mid + ", " + numbers.get(mid));
         List<Integer> sub1 = numbers.subList(0, mid);
         List<Integer> sub2 = numbers.subList(mid, numbers.size());
         System.out.println("Sublists" + sub1 + ", " + sub2);
-        
-        System.out.println(f(76,numbers));
+        int a = 5;
+        System.out.println("The number " + a + " is at index: " + f(a,numbers));
     }
 
-    public static Integer f(Integer n, ArrayList<Integer> arr){
-        int mid = (arr.size())/2;  //Rounded to the smaller integer
-        int searchIndex;
-        System.out.println("New Mid: " + mid);
+    public static int f(int n, ArrayList<Integer> arr){
+        int counter = 0;
+        int mid = (arr.size())/2;  //Rounded up
+        System.out.println();
         if (arr.get(mid)== n){
-            return mid; 
+            return searchIndex - counter; 
         }
         else {
             if (arr.get(mid) > n) {
+                System.out.println("Number is smaller than mid");
                 arr = new ArrayList<>(arr.subList(0, mid));
-                searchIndex = 
-                System.out.println("New Array: " + arr);
+                counter++;  //Because of the round down of integers we have to remove one more each time we reduce the searchIndex
+                mid = (arr.size())/2;
+                searchIndex = searchIndex - mid;
+                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid + " Search index: " + searchIndex);
             }
             else {
+                System.out.println("Number is larger than mid");
                 arr = new ArrayList<>(arr.subList(mid, arr.size()));
-                System.out.println("New Array: " + arr);
+                mid = (arr.size())/2;
+                searchIndex += mid;
+                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid + " Search index: " + searchIndex);
             }
         }
         return f(n,arr);
     }
-    
+    public static int g(int n, ArrayList<Integer> arr){
+        int mid = (arr.size())/2;  //Rounded to the smaller integer
+        System.out.println("\nNew run. Mid index = " + mid);
+        if (arr.get(mid)== n){
+            return counter; //I 've divided the array counter times so the index should be 
+        }
+        else {
+            counter++;
+            if (arr.get(mid) > n) {
+                System.out.println("Number is smaller than mid");
+                arr = new ArrayList<>(arr.subList(0, mid));
+                mid = (arr.size())/2;
+                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid);
+            }
+            else {
+                System.out.println("Number is larger than mid");
+                arr = new ArrayList<>(arr.subList(mid, arr.size()));
+                mid = (arr.size())/2;
+                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid);
+            }
+        }
+        return g(n,arr);
+    }
+
 }
