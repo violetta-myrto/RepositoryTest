@@ -5,7 +5,6 @@ import java.util.List;
 
 public class Main {
     static int searchIndex;
-    static int counter = 0;
     public static void main(String[] args) {
         ArrayList<Integer> numbers = new ArrayList<Integer>();
         Random rand = new Random(42);
@@ -20,63 +19,167 @@ public class Main {
         // Print the sorted list
         int mid = (numbers.size())/2;
         searchIndex = mid;
-        System.out.println(numbers);
-        System.out.println("Mid = " + mid + ", " + numbers.get(mid));
-        List<Integer> sub1 = numbers.subList(0, mid);
-        List<Integer> sub2 = numbers.subList(mid, numbers.size());
-        System.out.println("Sublists" + sub1 + ", " + sub2);
-        int a = 5;
-        System.out.println("The number " + a + " is at index: " + f(a,numbers));
+        
+        int a = 93;
+        System.out.println("The number " + a + " is at index: " + f(a,numbers,0,numbers.size()-1));
     }
 
-    public static int f(int n, ArrayList<Integer> arr){
-        int counter = 0;
-        int mid = (arr.size())/2;  //Rounded up
-        System.out.println();
-        if (arr.get(mid)== n){
-            return searchIndex - counter; 
+    public static int f(int n, ArrayList<Integer> arr, int start, int end){
+        if (start>end){
+            return -1; 
+        }
+        int mid = start + (end-start)/2;
+        if (arr.get(mid)==n){
+            return mid;
         }
         else {
             if (arr.get(mid) > n) {
                 System.out.println("Number is smaller than mid");
-                arr = new ArrayList<>(arr.subList(0, mid));
-                counter++;  //Because of the round down of integers we have to remove one more each time we reduce the searchIndex
-                mid = (arr.size())/2;
-                searchIndex = searchIndex - mid;
-                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid + " Search index: " + searchIndex);
+                return f(n,arr,start,mid-1);
             }
             else {
                 System.out.println("Number is larger than mid");
-                arr = new ArrayList<>(arr.subList(mid, arr.size()));
-                mid = (arr.size())/2;
-                searchIndex += mid;
-                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid + " Search index: " + searchIndex);
             }
         }
-        return f(n,arr);
+        return f(n,arr,mid+1,end);
     }
-    public static int g(int n, ArrayList<Integer> arr){
-        int mid = (arr.size())/2;  //Rounded to the smaller integer
-        System.out.println("\nNew run. Mid index = " + mid);
-        if (arr.get(mid)== n){
-            return counter; //I 've divided the array counter times so the index should be 
-        }
-        else {
-            counter++;
-            if (arr.get(mid) > n) {
-                System.out.println("Number is smaller than mid");
-                arr = new ArrayList<>(arr.subList(0, mid));
-                mid = (arr.size())/2;
-                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid);
-            }
-            else {
-                System.out.println("Number is larger than mid");
-                arr = new ArrayList<>(arr.subList(mid, arr.size()));
-                mid = (arr.size())/2;
-                System.out.println("New Array: " + arr + " Mid: " + arr.get(mid) + " index: " + mid);
-            }
-        }
-        return g(n,arr);
-    }
-
 }
+
+Your current approach has a few fundamental problems that break binary search logic:
+
+* You keep slicing the array (`subList`) → this **loses the original indices**
+* You rely on a global `searchIndex` → this becomes inconsistent quickly
+* You reset `counter` inside the function → it never accumulates
+* Your recursion has **no proper base case** (can crash if element not found)
+* Binary search should **not create new arrays each step** — it should use index bounds
+
+---
+
+## ✅ Clean & Correct Binary Search (Recursive)
+
+Here’s a fixed version of your code using proper binary search:
+
+```java
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
+public class Main {
+
+    public static void main(String[] args) {
+        ArrayList<Integer> numbers = new ArrayList<>();
+        Random rand = new Random(42);
+
+        // Add 15 random numbers
+        for (int i = 0; i < 15; i++) {
+            numbers.add(rand.nextInt(100));
+        }
+
+        Collections.sort(numbers);
+        System.out.println("Sorted list: " + numbers);
+
+        int target = 5;
+        int index = binarySearch(numbers, target, 0, numbers.size() - 1);
+
+        System.out.println("The number " + target + " is at index: " + index);
+    }
+
+    public static int binarySearch(ArrayList<Integer> arr, int target, int left, int right) {
+        // Base case: not found
+        if (left > right) {
+            return -1;
+        }
+
+        int mid = left + (right - left) / 2;
+
+        if (arr.get(mid) == target) {
+            return mid;
+        } else if (arr.get(mid) > target) {
+            return binarySearch(arr, target, left, mid - 1);
+        } else {
+            return binarySearch(arr, target, mid + 1, right);
+        }
+    }
+}
+```
+
+---
+
+## 🔧 What Changed (and Why)
+
+### 1. No array slicing
+
+Instead of:
+
+```java
+arr = new ArrayList<>(arr.subList(...));
+```
+
+We use:
+
+```java
+left, right
+```
+
+This keeps the original indices intact.
+
+---
+
+### 2. No global `searchIndex`
+
+We directly return the correct index using bounds.
+
+---
+
+### 3. Proper base case
+
+```java
+if (left > right) return -1;
+```
+
+Prevents infinite recursion.
+
+---
+
+### 4. Correct mid calculation
+
+```java
+int mid = left + (right - left) / 2;
+```
+
+Safer and standard.
+
+---
+
+## ⚡ Optional: Iterative Version (Even Better)
+
+```java
+public static int binarySearchIterative(ArrayList<Integer> arr, int target) {
+    int left = 0;
+    int right = arr.size() - 1;
+
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+
+        if (arr.get(mid) == target) {
+            return mid;
+        } else if (arr.get(mid) > target) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+
+    return -1;
+}
+```
+
+---
+
+## 🚨 Key Takeaway
+
+Binary search is about **narrowing boundaries**, not shrinking arrays.
+
+---
+
+If you want, I can rewrite your version *keeping your debug prints* so you can see each step clearly.
